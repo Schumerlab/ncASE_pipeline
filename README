@@ -12,7 +12,11 @@ bedtools
 
 All dependencies can be globally installed or set in the configuration file
 
-All parameters are set in the configurate file:
+All parameters are set in the configuration file, see cfg examples and below
+
+################
+###PARAMETERS
+#################
 
 #full path to the parental genomes
 #Note: make sure to unzip them!
@@ -35,7 +39,7 @@ path_to_samtools=
 #Note: give only the path to the parent bedtools folder, e.g. /usrbin/bedtools2 not /usrbin/bedtools2/bin/intersectBed
 path_to_bedtools=
 
-#path and name of gtf file
+#path and name of gtf file, leave empty if you are using a transcriptome 
 gtf_file=
 
 #allow sites where the alternate allele count is 0 (100% ASE). 0 for no, 1 for yes
