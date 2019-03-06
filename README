@@ -32,6 +32,7 @@ path_to_mapper=
 path_to_samtools=
 
 #path to bedtools if not globally installed
+#Note: give only the path to the parent bedtools folder, e.g. /usrbin/bedtools2 not /usrbin/bedtools2/bin/intersectBed
 path_to_bedtools=
 
 #path and name of gtf file
