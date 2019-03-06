@@ -15,6 +15,7 @@ All dependencies can be globally installed or set in the configuration file
 All parameters are set in the configurate file:
 
 #full path to the parental genomes
+#Note: make sure to unzip them!
 genome1=
 genome2=
 
