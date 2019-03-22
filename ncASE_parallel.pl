@@ -91,19 +91,29 @@ while (my $line=<CONFIG>){
         $number_indiv_per_job=$elements[1]; chomp $number_indiv_per_job;
        
         print "task being split into $number_indiv_per_job per job\n";
-        $prefix="$read_list.";
-        system("rm $prefix*");
-        system("split -d -e -l $number_indiv_per_job $read_list $prefix"); 
-        system("ls $prefix* > split_jobs_list");
-    }#batch parameters
-    if($line =~ /number_indiv_per_job/g){
-        $number_indiv_per_job=$elements[1]; chomp $number_indiv_per_job;
-       
-        print "task being split into $number_indiv_per_job per job\n";
-        $prefix="$read_list.";
-        system("rm $prefix*");
-        system("split -d -e -l $number_indiv_per_job $read_list $prefix"); 
-        system("ls $prefix* > split_jobs_list");
+	$prefix="$read_list.";
+	my $all_read_list=qx(cat $read_list); chomp $all_read_list;
+	my @read_list_array=split(/\n/,$all_read_list);
+
+	my $total=qx(wc -l $read_list | perl -p -e 's/ +/\t/g' | cut -f 1); chomp $read_list;
+
+	my $current_indiv_rl=0; my $counter_rl=0; my $file_num=0;
+	while($current_indiv_rl <= $total){
+
+	    if($counter_rl == 0){
+		open RL, ">$prefix"."part"."$file_num";
+		$file_num=$file_num+1;
+	    }#open new prefix file                                                                                                           
+
+	    print RL "$read_list_array[$current_indiv_rl]\n";
+
+	    $current_indiv_rl++; $counter_rl++;
+
+	    if($counter_rl >= $number_indiv_per_job){
+		$counter_rl=0;
+	    }#reset counter                                                                                                                  
+	}#count jobs                                                                                                                         
+	system("ls $prefix* > split_jobs_list");
     }#batch parameters
     if($line =~ /slurm_command_map/g){
         my @job1=split(/\#/,$line);
