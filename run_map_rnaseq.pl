@@ -22,7 +22,7 @@ while(my $line1 =<IN1>){
 
     chomp $line1;
 
-    if(($read_type eq 'SE') && ($mapper eq 'bwa')){
+    if(($read_type eq 'SE') && (($mapper eq 'bwa') or ($mapper eq 'BWA'))){
 	my $sam1 = "$line1".".par1.sam";
 	my $sam2 = "$line1".".par2.sam";
 
@@ -33,7 +33,7 @@ while(my $line1 =<IN1>){
 
     }#SE reads
 
-    if(($read_type eq 'PE') && ($mapper eq 'bwa')){
+    if(($read_type eq 'PE') && (($mapper eq 'bwa')  or ($mapper eq 'BWA'))){
 
         my @read_array=split(/\t/,$line1);
 
@@ -50,7 +50,7 @@ while(my $line1 =<IN1>){
 
     }#PE reads
 
-    if(($read_type eq 'SE') && ($mapper eq 'star')){
+    if(($read_type eq 'SE') && (($mapper eq 'star') or ($mapper eq 'STAR'))){
 	my $prefix1="$line1"."_par1";
         system("$path --genomeDir ./par1 --readFilesIn $line1 --readFilesCommand zcat --outFileNamePrefix $prefix1 --sjdbGTFfile $gtf --outSAMtype BAM SortedByCoordinate --quantMode TranscriptomeSAM");
 
@@ -59,7 +59,7 @@ while(my $line1 =<IN1>){
 
     }#SE reads STAR
 
-    if(($read_type eq 'PE') && ($mapper eq 'star')){
+    if(($read_type eq 'PE') && (($mapper eq 'star') or ($mapper eq 'STAR'))){
 
 	my @read_array=split(/\t/,$line1);
 
