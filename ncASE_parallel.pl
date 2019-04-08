@@ -152,9 +152,6 @@ if(length($map_path)>0){
     $mapper="$map_path"."/"."STAR";
     }#set correct path for mapping
 }#replace
-elsif(length($map_path) == 0){
-    $mapper="STAR";
-}#no path provided
 if(length($sam_path)>0){
     $path_bcf="$sam_path"."/"."$bcftools";
     $path_sam="$sam_path"."/"."$samtools";
