@@ -3,7 +3,7 @@
 my $config=shift(@ARGV); chomp $config;
 open CONFIG, $config or die "cannot open configuration file\n";
 
-my $genome1=""; my $genome2=""; my $read_type=""; my $read_list=""; my $read_length=""; my $number_indiv_per_job=""; my $gtf=""; my $mapper=""; my $gtf_status=""; my $aims_status=""; my $map_path=""; my $sam_path=""; my $allow_zero_counts=""; my $bias_threshold=""; my $skip=0; my $bedtools_path="";
+my $genome1=""; my $genome2=""; my $read_type=""; my $read_list=""; my $read_length=""; my $number_indiv_per_job=""; my $gtf=""; my $mapper=""; my $gtf_status=""; my $aims_status=""; my $map_path=""; my $sam_path=""; my $allow_zero_counts=""; my $bias_threshold=""; my $skip=0; my $bedtools_path=""; my @jobs=();
 
 my $num_jobs=""; my $job1_submit=""; my $job2_submit=""; my $job3_submit="";
 
@@ -92,42 +92,51 @@ while (my $line=<CONFIG>){
        
         print "task being split into $number_indiv_per_job per job\n";
 	$prefix="$read_list.";
+
+	open SPLIT, ">split_jobs_list";
+
 	my $all_read_list=qx(cat $read_list); chomp $all_read_list;
 	my @read_list_array=split(/\n/,$all_read_list);
 
 	my $total=qx(wc -l $read_list | perl -p -e 's/ +/\t/g' | cut -f 1); chomp $read_list;
+	$total=$total-1;
+	#print "total number of files is $total\n";
 
 	my $current_indiv_rl=0; my $counter_rl=0; my $file_num=0;
-	while($current_indiv_rl <= $total){
-
+	while($current_indiv_rl < $total){
+	    #print "$current_indiv_rl\t$total\n";
 	    if($counter_rl == 0){
-		open RL, ">$prefix"."part"."$file_num";
+		my $prefix_file_curr="$prefix"."part"."$file_num";
+		print SPLIT "$prefix_file_curr\n";
+		push(@jobs,$prefix_file_curr);
+		open RL, ">$prefix_file_curr";
 		$file_num=$file_num+1;
 	    }#open new prefix file                                                                                                           
-
 	    print RL "$read_list_array[$current_indiv_rl]\n";
 
 	    $current_indiv_rl++; $counter_rl++;
 
-	    if($counter_rl >= $number_indiv_per_job){
+	    if($counter_rl == $number_indiv_per_job){
 		$counter_rl=0;
 	    }#reset counter                                                                                                                  
-	}#count jobs                                                                                                                         
-	system("ls $prefix* > split_jobs_list");
+	}#count jobs                                                                                                                     
+
+#	system("ls $prefix* > split_jobs_list");
+    
     }#batch parameters
     if($line =~ /slurm_command_map/g){
         my @job1=split(/\#/,$line);
-        $job1_submit="#"."$job1[1]"."\n"."#"."$job1[2]"."\n"."#"."$job1[3]"."\n"."#"."$job1[4]"."\n"."#"."$job1[5]"."\n"; chomp $job1_submit;
+        $job1_submit="#"."$job1[1]"."\n"."#"."$job1[2]"."\n"."#"."$job1[3]"."\n"."#"."$job1[4]"."\n"."#"."$job1[5]"."\n"."$job1[6]"."\n"."$job1[7]"."\n"; chomp $job1_submit;
         print "cluster command for job1 is: $job1_submit\n";
     }#mapping command
     if($line =~ /slurm_command_variant_call/g){
         my @job2=split(/\#/,$line);
-        $job2_submit="#"."$job2[1]"."\n"."#"."$job2[2]"."\n"."#"."$job2[3]"."\n"."#"."$job2[4]"."\n"."#"."$job2[5]"."\n"; chomp $job2_submit;
+        $job2_submit="#"."$job2[1]"."\n"."#"."$job2[2]"."\n"."#"."$job2[3]"."\n"."#"."$job2[4]"."\n"."#"."$job2[5]"."\n"."$job2[6]"."\n"."#"."$job2[7]"."\n"; chomp $job2_submit;
         print "cluster command for job2 is: $job2_submit\n";
     }#variant calling command 
     if($line =~ /slurm_command_ncASE/g){
         my @job3=split(/\#/,$line);
-        $job3_submit="#"."$job3[1]"."\n"."#"."$job3[2]"."\n"."#"."$job3[3]"."\n"."#"."$job3[4]"."\n"."#"."$job3[5]"."\n"; chomp $job3_submit;
+        $job3_submit="#"."$job3[1]"."\n"."#"."$job3[2]"."\n"."#"."$job3[3]"."\n"."#"."$job3[4]"."\n"."#"."$job3[5]"."\n"."$job2[6]"."\n"."#"."$job2[7]"."\n"; chomp $job3_submit;
         print "cluster command for job3 is: $job3_submit\n";
     }#mapping command 
     if($line =~ /provide_AIMs/){
@@ -232,17 +241,12 @@ elsif(! -f $provide_AIMs){
 
 }#aims file defined but does not exist
 
-#####jobs array
-my @jobs=();
-open JOBS, "split_jobs_list";
-while(my $tmp=<JOBS>){
-    chomp $tmp; push(@jobs,$tmp);
-}#collect array of jobs
 
 ##two types of approaches, one for SE and one for PE
 my @slurm_ids_map=();
 my $slurm_sam_string="";
 my $hyb_string=""; my $par_string="";
+
 
 for my $j (0..scalar(@jobs)-1){
     my $current_job=$jobs[$j];

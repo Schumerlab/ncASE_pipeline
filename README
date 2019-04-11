@@ -23,7 +23,7 @@ All parameters are set in the configuration file, see cfg examples and below
 genome1=
 genome2=
 
-#genome index or not, 0 to skip, 1 to index
+#genome index or not, 0 to index, 1 to skip
 skip_genome_index=
 
 #mapping program to use, options are bwa or star
