@@ -31,8 +31,10 @@ while (my $line=<CONFIG>){
 	$mapper=$elements[1]; chomp $mapper;
 	if(($mapper eq 'bwa') or ($mapper eq 'BWA')){
 	    print "mapping RNAseq reads with bwa\n";
+	    $mapper="bwa";
 	} elsif(($mapper eq 'star') or ($mapper eq 'STAR')){
 	    print "mapping RNAseq reads with star\n";
+	    $mapper="star";
 	} else{
 	    die "mapper must be bwa or star\n";
 	}#mapper must be one of the approved mapper
@@ -99,7 +101,7 @@ while (my $line=<CONFIG>){
 	my @read_list_array=split(/\n/,$all_read_list);
 
 	my $total=qx(wc -l $read_list | perl -p -e 's/ +/\t/g' | cut -f 1); chomp $read_list;
-	$total=$total-1;
+	#!$total=$total-1;
 	#print "total number of files is $total\n";
 
 	my $current_indiv_rl=0; my $counter_rl=0; my $file_num=0;
