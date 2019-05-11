@@ -154,7 +154,7 @@ while (my $line=<CONFIG>){
 }#read in the configuration file
 
 ####replace mapper and variant caller with full path variables
-my $path_bcf="bcftools"; my $path_sam="samtools"; my $path_bedtools="bedtools intersect"; 
+my $path_bcf="bcftools"; my $path_sam="samtools"; my $path_bedtools="bedtools"; 
 my $program=$mapper;
 if(length($map_path)>0){
     if(($mapper eq 'bwa') or ($mapper eq 'BWA')){
@@ -168,7 +168,7 @@ if(length($sam_path)>0){
     $path_sam="$sam_path"."/"."$samtools";
 }#replace
 if(length($bedtools_path)>0){
-    $path_bedtools="$bedtools_path"."/bin/"."intersectBed";
+    $path_bedtools="$bedtools_path"."/bedtools";
 }#replace
 
 ####check if files exist

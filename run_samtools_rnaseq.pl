@@ -114,8 +114,8 @@ while (my $id = <IN>){
 	my $gtf1="$vcf1"."_gtf_overlap";
 	my $gtf2="$vcf2"."_gtf_overlap";
 
-	system("$path_bedtools -a $vcf1 -b $gtf -wo > $gtf1");
-	system("$path_bedtools -a $vcf2 -b $gtf -wo > $gtf2");
+	system("$path_bedtools intersect -a $vcf1 -b $gtf -wo > $gtf1");
+	system("$path_bedtools intersect -a $vcf2 -b $gtf -wo > $gtf2");
 
 	#overwrite original and proceed as before
 	system("perl ASE_to_transcripts.pl $gtf1 transcript > $vcf1");
