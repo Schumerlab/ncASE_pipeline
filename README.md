@@ -1,8 +1,10 @@
-This is a pipeline for determining allele specific expression using two colinear reference genomes and non-competitive mapping (ncASE). 
+# ncASE 
+
+ncASE is a pipeline for determining allele specific expression using two colinear reference genomes and non-competitive mapping (ncASE). 
 
 Further updates will extend to non-colinear cases and other mappers.
 
-Dependencies:
+## Dependencies
 
 samtools v~1.9
 bcftools v~1.9
@@ -10,63 +12,101 @@ bwa
 R
 bedtools
 
-All dependencies can be globally installed or set in the configuration file
+All dependencies can be globally installed or set in the configuration file.
 
-All parameters are set in the configuration file, see cfg examples and below
+This program runs batch jobs through Slurm workload manager, found on many HPC clusters.
 
-################
-###PARAMETERS
-#################
+## Usage
 
-#full path to the parental genomes
-#Note: make sure to unzip them!
+```bash 
+perl ncASE_parallel.pl configuration.cfg
+```
+
+## Parameters
+
+All parameters are set in the configuration file, see .cfg examples and below.
+
+The following parameters should appear in your configuration file, one parameter per line:
+
+Full path to the parental genomes (make sure to unzip them!)
+```bash
 genome1=
 genome2=
+```
 
-#genome index or not, 0 to index, 1 to skip
+Genome index or not: 0 to index, 1 to skip
+```bash
 skip_genome_index=
+```
 
-#mapping program to use, options are bwa or star
+Mapping program to use: bwa or star
+```bash
 mapping_program=
-
-#path to ncASE_pipeline scripts
+```
+Path to ncASE_pipeline scripts
+```bash
 path_to_ncASE=./
+```
 
-#path to mapper if not globally installed
+Path to mapper (if not globally installed)
+```bash
 path_to_mapper=
+```
 
-#path to samtools if not globally installed
+Path to samtools (if not globally installed)
+```bash
 path_to_samtools=
+```
 
-#path to bedtools if not globally installed
-#Note: give only the path to the parent bedtools folder, e.g. /usrbin/bedtools2 not /usrbin/bedtools2/bin/intersectBed
+Path to bedtools (if not globally installed)
+Note: give only the path to the parent bedtools folder, e.g. /usrbin/bedtools2 not /usrbin/bedtools2/bin/intersectBed
+```bash
 path_to_bedtools=
+```
 
-#path and name of gtf file, leave empty if you are using a transcriptome 
+Path and name of gtf annotation file, leave empty if you are using a transcriptome 
+```bash
 gtf_file=
+```
 
-#allow sites where the alternate allele count is 0 (100% ASE). 0 for no, 1 for yes
+Allow sites where the alternate allele count is 0 (100% ASE)? 0 for no, 1 for yes
+```bash
 allow_zero_counts=0
+```
 
-#allelic bias tolerance proportion. For example 0.05 would allow sites where the inferred counts for parent 1 in the two genome references is up to 5% different
+Allelic bias tolerance proportion. For example, 0.05 would allow sites where the inferred counts for parent 1 in the two genome references is up to 5% different
+```bash
 allelic_bias_threshold=
+```
 
-#read type, options are SE or PE
+Read type: SE (single) or PE (paired)
+```bash
 read_type=
+```
 
-#read length
+Read length
+```bash
 read_length=
+```
 
-#list containing full path to the reads, with PE reads tab separated on the same line
+List containing full path to the reads. PE reads should be tab-separated on the same line
+```bash
 read_list=
+```
 
-#number of individuals to run in each job
+Number of individuals to run in each job sent to job scheduler
+```bash
 number_indiv_per_job=
+```
 
-#Aims file listing the chromosome, position, parent 1 base, and parent 2 base,  see swordtail examples for format
+AIMs file listing the chromosome, position, parent 1 base, and parent 2 base (see swordtail examples for format)
+```bash
 provide_AIMs=
+```
 
-#slurm commands for each job
+Slurm commands for each job. If you are using another job scheduler, edit these commands so that they are compatible with your scheduler's syntax.
+```bash
 slurm_command_map=
 slurm_command_variant_call=
 slurm_command_ncASE=
+```
