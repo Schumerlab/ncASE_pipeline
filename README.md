@@ -6,10 +6,10 @@ Further updates will extend to non-colinear cases and other mappers.
 
 ## Dependencies
 
-samtools v1.9
-bcftools v1.9
-bwa
-R
+samtools v1.9\
+bcftools v1.9\
+bwa\
+R\
 bedtools
 
 All dependencies can be globally installed or set in the configuration file.
