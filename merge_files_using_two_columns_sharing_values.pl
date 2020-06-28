@@ -5,6 +5,7 @@
 #e.g.: ScyDAA6_2-HRSCAF_26     8585
 
 #modified from the single file version on the FAS scriptome
+# perl $path/merge_files_using_two_columns_sharing_values.pl $aims 0 1 $vcf1 10 1 $overlap1
 
 if(@ARGV<7){
     print "perl merge_files_using_two_columns_sharing_values.pl file1_list column1_file1 column2_file1 file2_target column1_file2 column2_file2 outfile_name\n"; exit;

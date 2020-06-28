@@ -3,13 +3,13 @@
 my $config=shift(@ARGV); chomp $config;
 open CONFIG, $config or die "cannot open configuration file\n";
 
-my $genome1=""; my $genome2=""; my $read_type=""; my $read_list=""; my $read_length=""; my $number_indiv_per_job=""; my $gtf=""; my $mapper=""; my $gtf_status=""; my $aims_status=""; my $map_path=""; my $sam_path=""; my $allow_zero_counts=""; my $bias_threshold=""; my $skip=0; my $bedtools_path=""; my @jobs=();
+my $genome1=""; my $genome2=""; my $read_type=""; my $read_list=""; my $read_length=""; my $number_indiv_per_job=""; my $gtf=""; my $mapper=""; my $gtf_status=""; my $aims_status=""; my $map_path=""; my $sam_path=""; my $allow_zero_counts=""; my $bias_threshold=""; my $skip=0; my $bedtools_path=""; my @jobs=(); my $ncase_path="./";
 
 my $num_jobs=""; my $job1_submit=""; my $job2_submit=""; my $job3_submit="";
 
 my $provide_AIMs=""; my $provide_counts="";
 
-my $save_files=0;
+my $save_files=1;
 
 while (my $line=<CONFIG>){
 
@@ -51,16 +51,24 @@ while (my $line=<CONFIG>){
             print "no samtools path provided, assuming global install\n";
         }#no path provided 
     }#path to samtools
-    if($line =~/path_to_bedtools/g){
+    if($line =~ /path_to_bedtools/g){
 	$bedtools_path=$elements[1]; chomp $bedtools_path;
 	if(length($bedtools_path) eq 0){
 	    print "no bedtools path provided, assuming global install\n";
 	}#no path for bedtools
     }#path to bedtools
+    if($line =~ /path_to_ncASE/g){
+	$ncase_path=$elements[1]; chomp $ncase_path;
+	if(length($ncase_path) eq 0){
+	    print "no ncase program path provided, assuming scripts are in working directory\n";
+	    $ncase_path="./";
+	}#no path to ncase
+    }#path to install ncase
     if($line =~/gtf_file/g){
 	$gtf=$elements[1]; chomp $gtf;
 	if(length($gtf) eq 0){
 	    $gtf_status=0; print "gtf file not provided\n";
+	    $gtf=0;
 	} elsif(length($gtf) > 0){
 	    $gtf_status=1; print "gtf file is $gtf\n";
 	}#check gft status
@@ -91,7 +99,7 @@ while (my $line=<CONFIG>){
     }#define save files
     if($line =~ /number_indiv_per_job/g){
         $number_indiv_per_job=$elements[1]; chomp $number_indiv_per_job;
-       
+      
         print "task being split into $number_indiv_per_job per job\n";
 	$prefix="$read_list.";
 
@@ -220,7 +228,7 @@ $aims=~ s/\//_/g;
 if(length($provide_AIMs)==0){
 
     if((! -f $aims) or (! -f "current_aims_file")){
-	system("perl identify_AIMs_two_genomes.pl $genome1 $genome2 > $aims");
+	system("perl $ncase_path/identify_AIMs_two_genomes.pl $genome1 $genome2 > $aims");
 	open AIMSFILE, ">current_aims_file";
 	print AIMSFILE "$aims\n";
     }#if aims file and key do not exist, write them
@@ -232,7 +240,7 @@ print "aims files $aims and current_aims_file exist, not overwriting\n"
 elsif(-f $provide_AIMs){
 
     system("cp $provide_AIMs $aims");
-    system("perl -pi -e 's/\t/_/g' $aims"); #reformat for downstream compatibility
+    #!system("perl -pi -e 's/\t/_/g' $aims"); #reformat for downstream compatibility
     open AIMSFILE, ">current_aims_file";
     print AIMSFILE "$aims\n";
 
@@ -259,9 +267,9 @@ for my $j (0..scalar(@jobs)-1){
 
 ####put appropriate mapping commands for STAR or BWA###
 if($program eq 'bwa'){
-    print MAPSCRIPT "perl run_map_rnaseq.pl $current_job $genome1 $genome2 $read_type bwa $mapper $gtf\n";
+    print MAPSCRIPT "perl $ncase_path/run_map_rnaseq.pl $current_job $genome1 $genome2 $read_type bwa $mapper $gtf\n";
 } elsif($program eq 'star'){
-    print MAPSCRIPT "perl run_map_rnaseq.pl $current_job $genome1 $genome2 $read_type star $mapper $gtf\n";
+    print MAPSCRIPT "perl $ncase_path/run_map_rnaseq.pl $current_job $genome1 $genome2 $read_type star $mapper $gtf\n";
 }#map using appropriate commands
 
     my $id_temp=qx(sbatch $mapscript); chomp $id_temp;
@@ -283,9 +291,9 @@ for my $m (0..scalar(@jobs)-1){
 ####SAVE FILENAMES for final ncASE string
 #!    print VARSCRIPT "perl run_samtools_to_hmm_v8.pl $current_job $genome1 $genome2 $read_length $save_files $max_align $focal_chrom $rec_M_per_bp\n";
     if($program eq 'bwa'){
-    print VARSCRIPT "perl run_samtools_rnaseq.pl $current_job $genome1 $genome2 $read_length bwa $path_sam $path_bcf $path_bedtools $gtf\n";
+    print VARSCRIPT "perl $ncase_path/run_samtools_rnaseq.pl $current_job $genome1 $genome2 $read_length bwa $path_sam $path_bcf $path_bedtools $gtf $save_files $ncase_path\n";
     } elsif($program eq 'star'){
-    print VARSCRIPT "perl run_samtools_rnaseq.pl $current_job $genome1 $genome2 $read_length star $path_sam $path_bcf $path_bedtools $gtf\n";
+    print VARSCRIPT "perl $ncase_path/run_samtools_rnaseq.pl $current_job $genome1 $genome2 $read_length star $path_sam $path_bcf $path_bedtools $gtf $save_files $ncase_path\n";
     }#use appropriate commands  
 
     my $map_depend=$slurm_ids_map[$m];
@@ -316,6 +324,9 @@ while(my $reads=<READS>){
     $file1="$file1"."_par1_ASE_counts";
     $file2="$file2"."_par2_ASE_counts";
 
+    $file1=~ s/\//_/g;
+    $file2=~ s/\//_/g;
+
     $ase_string="$ase_string"." "."$file1"." "."$file2";
 
 }#read in read data for summary
@@ -324,6 +335,9 @@ open ASESCRIPT, ">ncase_batch.sh";
 print ASESCRIPT "$job3_submit\n";
 ##print ncASE_v3.R command
 my $summary_file="$read_list"."_counts_summarized";
-print ASESCRIPT "Rscript ncASE_pipeline_cmd.R $ase_string $read_length $allow_zero_counts $bias_threshold $summary_file\n";
+# this is the only command that uses $allow_zero_counts
+#XoldX print ASESCRIPT "Rscript ncASE_pipeline_cmd.R $ase_string $read_length $allow_zero_counts $bias_threshold $summary_file\n";
+# this version doesn't have allow_zero_counts functionality yet 
+print ASESCRIPT "Rscript $ncase_path/ncASE_cmd_I-2020.R $ase_string $allow_zero_counts $bias_threshold $read_length $summary_file\n";
 
 system("sbatch --dependency=afterok:$slurm_sam_string ncase_batch.sh");
