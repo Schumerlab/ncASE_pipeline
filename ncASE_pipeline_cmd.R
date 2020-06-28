@@ -1,3 +1,6 @@
+# NOTE: this is the OLD R script
+# usage:
+#"Rscript ncASE_cmd_I-2020.R $ase_string $read_length $allow_zero_counts $bias_threshold $summary_file"
 args<-commandArgs(TRUE)
 
 mydist <- function(data, snp1, snp2){
