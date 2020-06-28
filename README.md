@@ -6,8 +6,8 @@ Further updates will extend to non-colinear cases and other mappers.
 
 ## Dependencies
 
-samtools v~1.9
-bcftools v~1.9
+samtools v1.9
+bcftools v1.9
 bwa
 R
 bedtools
